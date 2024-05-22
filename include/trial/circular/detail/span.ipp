@@ -463,11 +463,8 @@ constexpr auto span<T, E>::first_unused_segment() const noexcept -> const_segmen
 {
     return (full())
         ? const_segment()
-        : (wraparound()
-           ? const_segment(member.data + back_index() + 1,
-                           member.data + capacity())
-           : const_segment(member.data + back_index() + 1,
-                           member.data + capacity()));
+        : const_segment(member.data + member.next - capacity(),
+                  member.data + std::min(front_index(), capacity()));
 }
 
 template <typename T, std::size_t E>
