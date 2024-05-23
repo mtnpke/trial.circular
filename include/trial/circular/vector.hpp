@@ -314,6 +314,22 @@ public:
     //! @brief Returns const reverse iterator to ending of circular array.
 
     using span::crend;
+
+    //! @brief Returns first contiguous segment of the span.
+
+    using span::first_segment;
+
+    //! @brief Returns last contiguous segment of the span.
+
+    using span::last_segment;
+
+    //! @brief Returns first contiguous unused segment of the span.
+
+    using span::first_unused_segment;
+
+    //! @brief Returns last contiguous unused segment of the span.
+
+    using span::last_unused_segment;
 };
 
 } // namespace circular

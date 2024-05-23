@@ -493,6 +493,54 @@ void api_crbegin_crend()
     }
 }
 
+void api_first_segment()
+{
+    circular::vector<int> data(4);
+    data = { 11, 22 };
+    auto segment = data.first_segment();
+    {
+        std::vector<int> expect = { 11, 22 };
+        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
+                          expect.begin(), expect.end());
+    }
+}
+
+void api_last_segment()
+{
+    circular::vector<int> data(4);
+    data = { 11, 22 };
+    auto segment = data.last_segment();
+    {
+        std::vector<int> expect = { };
+        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
+                          expect.begin(), expect.end());
+    }
+}
+
+void api_first_unused_segment()
+{
+    circular::vector<int> data(4);
+    data = { 11, 22 };
+    auto segment = data.first_unused_segment();
+    {
+        std::vector<int> expect = { 0, 0 };
+        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
+                          expect.begin(), expect.end());
+    }
+}
+
+void api_last_unused_segment()
+{
+    circular::vector<int> data(4);
+    data = { 11, 22 };
+    auto segment = data.last_unused_segment();
+    {
+        std::vector<int> expect = { };
+        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
+                          expect.begin(), expect.end());
+    }
+}
+
 void run()
 {
     api_ctor_default();
@@ -542,6 +590,10 @@ void run()
     api_cbegin_cend();
     api_rbegin_rend();
     api_crbegin_crend();
+    api_first_segment();
+    api_last_segment();
+    api_first_unused_segment();
+    api_last_unused_segment();
 }
 
 } // namespace api_suite
