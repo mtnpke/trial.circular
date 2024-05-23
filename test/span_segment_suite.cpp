@@ -10,10 +10,25 @@
 
 #include <array>
 #include <vector>
+#include <memory>
 #include <trial/detail/lightweight_test.hpp>
 #include <trial/circular/span.hpp>
 
 using namespace trial;
+
+#define TEST_CONST_FIRST_UNUSED_SEGMENT 0
+
+//-----------------------------------------------------------------------------
+// P0007
+
+template <typename T>
+constexpr auto as_const(T& object) noexcept -> typename std::add_const<T>::type&
+{
+    return object;
+}
+
+template <typename T>
+void as_const(const T&&) = delete;
 
 //-----------------------------------------------------------------------------
 
@@ -185,31 +200,41 @@ void segment_empty()
     circular::span<int> span(array);
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 4);
 
-        std::vector<int> expect = { 0, 0, 0, 0 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
 }
 
@@ -221,121 +246,159 @@ void segment_partial()
     span = { 11 };
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 11 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 3);
 
-        std::vector<int> expect = { 0, 0, 0 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // 11 22 X X
     span.push_back(22);
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 11, 22 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 2);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 0, 0 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // 11 22 33 X
     span.push_back(33);
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 3);
 
-        std::vector<int> expect = { 11, 22, 33 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 3);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 0 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // 11 22 33 44
     span.push_back(44);
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 4);
 
-        std::vector<int> expect = { 11, 22, 33, 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
 }
 
@@ -347,151 +410,191 @@ void segment_overfull()
     span = { 11, 22, 33, 44, 55 };
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 3);
 
-        std::vector<int> expect = { 22, 33, 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 55 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // 55 66 33 44
     span.push_back(66);
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 2);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 33, 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 55, 66 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // 55 66 77 44
     span.push_back(77);
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 3);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 3);
 
-        std::vector<int> expect = { 55, 66, 77 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // 55 66 77 88
     span.push_back(88);
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 4);
 
-        std::vector<int> expect = { 55, 66, 77, 88 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // 99 66 77 88
     span.push_back(99);
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 3);
 
-        std::vector<int> expect = { 66, 77, 88 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 99 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
 }
 
@@ -504,155 +607,205 @@ void segment_overfull_1()
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 2);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 33, 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 55 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 22 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // 55 66 X 44
     span.push_back(66);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 3);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 55, 66 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 2);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 33 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // 55 66 77 X
     span.push_back(77);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 3);
 
-        std::vector<int> expect = { 55, 66, 77 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 3);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // X 66 77 88
     span.push_back(88);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 3);
 
-        std::vector<int> expect = { 66, 77, 88 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 55 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // 99 X 77 88
     span.push_back(99);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 2);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 77, 88 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 99 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 66 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
 }
 
@@ -665,155 +818,205 @@ void segment_overfull_2()
     span.remove_front(2);
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 3);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 55 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 22, 33 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // 55 66 X X
     span.push_back(66);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 55, 66 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 2);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 33, 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // X 66 77 X
     span.push_back(77);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 66, 77 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 3);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 55 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // X X 77 88
     span.push_back(88);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 2);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 77, 88 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 55, 66 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // 99 X X 88
     span.push_back(99);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 3);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 88 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 99 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 66, 77 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
 }
 
@@ -826,155 +1029,205 @@ void segment_overfull_3()
     span.remove_front(3);
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 55 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 3);
 
-        std::vector<int> expect = { 22, 33, 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // X 66 X X
     span.push_back(66);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 66 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 2);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 33, 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 55 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // X X 77 X
     span.push_back(77);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 2);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 77 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 3);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 55, 66 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // X X X 88
     span.push_back(88);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 3);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 88 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 3);
 
-        std::vector<int> expect = { 55, 66, 77 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // 99 X X X
     span.push_back(99);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 99 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 3);
 
-        std::vector<int> expect = { 66, 77, 88 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
 }
 
@@ -987,155 +1240,205 @@ void segment_overfull_4()
     span.remove_front(4);
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 3);
 
-        std::vector<int> expect = { 22, 33, 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 55 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // X Z X X
     span.push_back(66);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 2);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 33, 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 2);
 
-        std::vector<int> expect = { 55, 66 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // X X Z X
     span.push_back(77);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 3);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 44 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 3);
 
-        std::vector<int> expect = { 55, 66, 77 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // X X X Z
     span.push_back(88);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 4);
 
-        std::vector<int> expect = { 55, 66, 77, 88 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     // Z X X X
     span.push_back(99);
     span.remove_front();
     {
         auto segment = span.first_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).first_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.last_segment();
+        TRIAL_TEST_EQ(segment.data(), nullptr);
+        TRIAL_TEST_EQ(segment.size(), 0);
 
-        std::vector<int> expect = { };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
     {
         auto segment = span.first_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 1);
+        TRIAL_TEST_EQ(segment.size(), 3);
 
-        std::vector<int> expect = { 66, 77, 88 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+#if TEST_CONST_FIRST_UNUSED_SEGMENT
+        auto const_segment = as_const(span).first_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
+#endif
     }
     {
         auto segment = span.last_unused_segment();
+        TRIAL_TEST_EQ(segment.data() - array, 0);
+        TRIAL_TEST_EQ(segment.size(), 1);
 
-        std::vector<int> expect = { 99 };
-        TRIAL_TEST_ALL_EQ(segment.data(), segment.data() + segment.size(),
-                          expect.begin(), expect.end());
+        auto const_segment = as_const(span).last_unused_segment();
+        TRIAL_TEST_EQ(segment.data(), const_segment.data());
+        TRIAL_TEST_EQ(segment.size(), const_segment.size());
     }
 }
 
