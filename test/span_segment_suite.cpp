@@ -16,8 +16,6 @@
 
 using namespace trial;
 
-#define TEST_CONST_FIRST_UNUSED_SEGMENT 0
-
 //-----------------------------------------------------------------------------
 // P0007
 
@@ -221,11 +219,9 @@ void segment_empty()
         TRIAL_TEST_EQ(segment.data() - array, 0);
         TRIAL_TEST_EQ(segment.size(), 4);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -267,11 +263,9 @@ void segment_partial()
         TRIAL_TEST_EQ(segment.data() - array, 1);
         TRIAL_TEST_EQ(segment.size(), 3);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -307,11 +301,9 @@ void segment_partial()
         TRIAL_TEST_EQ(segment.data() - array, 2);
         TRIAL_TEST_EQ(segment.size(), 2);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -347,11 +339,9 @@ void segment_partial()
         TRIAL_TEST_EQ(segment.data() - array, 3);
         TRIAL_TEST_EQ(segment.size(), 1);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -628,11 +618,9 @@ void segment_overfull_1()
         TRIAL_TEST_EQ(segment.data() - array, 1);
         TRIAL_TEST_EQ(segment.size(), 1);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -669,11 +657,9 @@ void segment_overfull_1()
         TRIAL_TEST_EQ(segment.data() - array, 2);
         TRIAL_TEST_EQ(segment.size(), 1);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -710,11 +696,9 @@ void segment_overfull_1()
         TRIAL_TEST_EQ(segment.data() - array, 3);
         TRIAL_TEST_EQ(segment.size(), 1);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -751,11 +735,9 @@ void segment_overfull_1()
         TRIAL_TEST_EQ(segment.data() - array, 0);
         TRIAL_TEST_EQ(segment.size(), 1);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -792,11 +774,9 @@ void segment_overfull_1()
         TRIAL_TEST_EQ(segment.data() - array, 1);
         TRIAL_TEST_EQ(segment.size(), 1);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -839,11 +819,9 @@ void segment_overfull_2()
         TRIAL_TEST_EQ(segment.data() - array, 1);
         TRIAL_TEST_EQ(segment.size(), 2);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -880,11 +858,9 @@ void segment_overfull_2()
         TRIAL_TEST_EQ(segment.data() - array, 2);
         TRIAL_TEST_EQ(segment.size(), 2);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -921,11 +897,9 @@ void segment_overfull_2()
         TRIAL_TEST_EQ(segment.data() - array, 3);
         TRIAL_TEST_EQ(segment.size(), 1);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -962,11 +936,9 @@ void segment_overfull_2()
         TRIAL_TEST_EQ(segment.data() - array, 0);
         TRIAL_TEST_EQ(segment.size(), 2);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -1003,11 +975,9 @@ void segment_overfull_2()
         TRIAL_TEST_EQ(segment.data() - array, 1);
         TRIAL_TEST_EQ(segment.size(), 2);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -1050,11 +1020,9 @@ void segment_overfull_3()
         TRIAL_TEST_EQ(segment.data() - array, 1);
         TRIAL_TEST_EQ(segment.size(), 3);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -1091,11 +1059,9 @@ void segment_overfull_3()
         TRIAL_TEST_EQ(segment.data() - array, 2);
         TRIAL_TEST_EQ(segment.size(), 2);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -1132,11 +1098,9 @@ void segment_overfull_3()
         TRIAL_TEST_EQ(segment.data() - array, 3);
         TRIAL_TEST_EQ(segment.size(), 1);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -1173,11 +1137,9 @@ void segment_overfull_3()
         TRIAL_TEST_EQ(segment.data() - array, 0);
         TRIAL_TEST_EQ(segment.size(), 3);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -1214,11 +1176,9 @@ void segment_overfull_3()
         TRIAL_TEST_EQ(segment.data() - array, 1);
         TRIAL_TEST_EQ(segment.size(), 3);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -1261,11 +1221,9 @@ void segment_overfull_4()
         TRIAL_TEST_EQ(segment.data() - array, 1);
         TRIAL_TEST_EQ(segment.size(), 3);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -1302,11 +1260,9 @@ void segment_overfull_4()
         TRIAL_TEST_EQ(segment.data() - array, 2);
         TRIAL_TEST_EQ(segment.size(), 2);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -1343,11 +1299,9 @@ void segment_overfull_4()
         TRIAL_TEST_EQ(segment.data() - array, 3);
         TRIAL_TEST_EQ(segment.size(), 1);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -1384,11 +1338,9 @@ void segment_overfull_4()
         TRIAL_TEST_EQ(segment.data() - array, 0);
         TRIAL_TEST_EQ(segment.size(), 4);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
@@ -1425,11 +1377,9 @@ void segment_overfull_4()
         TRIAL_TEST_EQ(segment.data() - array, 1);
         TRIAL_TEST_EQ(segment.size(), 3);
 
-#if TEST_CONST_FIRST_UNUSED_SEGMENT
         auto const_segment = as_const(span).first_unused_segment();
         TRIAL_TEST_EQ(segment.data(), const_segment.data());
         TRIAL_TEST_EQ(segment.size(), const_segment.size());
-#endif
     }
     {
         auto segment = span.last_unused_segment();
